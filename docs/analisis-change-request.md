@@ -5,31 +5,31 @@ Isi bagian ini **sebelum** mengubah kode, lalu commit dan push (contoh pesan: `d
 **Change request:** pencarian, filter, dan ekspor CSV (lihat Tugas 3 di lembar challenge). Repo dokumen ada di https://github.com/mynamethiris/steampreneur-koreksikoding pada folder `docs`.
 
 **Kriteria penerimaan yang akan dipenuhi dan cara kami memenuhinya:**
-- Pengguna ketik kata kunci dan daftar langsung filter tanpa reload. Cara: state `search` plus `filteredAnalysis` untuk kode dan `filteredChallenges` untuk judul. Filter pakai `toLowerCase` plus `includes` sehingga huruf besar kecil tidak masalah.
-- Pengguna pindah tab Analisis dan Tantangan dengan mudah. Cara: state `activeTab` plus tab animasi `layoutId="riwayat-tab"`. Setiap ganti tab, `search` di-reset ke kosong lewat `setSearch('')`.
-- Pengguna unduh CSV dan buka di Excel. Cara: `exportToCSV` dengan bungkus kutip dan escape `""` plus `downloadFile` lewat Blob. File analisis bernama `riwayat-analisis.csv` dengan 5 kolom. File tantangan bernama `riwayat-tantangan.csv` dengan 4 kolom.
-- Pengguna impor balik JSON dan CSV dengan aman. Cara: `parseCSVRow` yang paham status `inQuotes`, lewati baris kurang kolom, lalu cek isi `score` dan `code` untuk analisis atau `title` dan `difficulty` untuk tantangan. File tertukar ditolak dengan pesan jelas dan data lama tetap aman.
-- Alur analisis tidak berubah. Cara: tidak menyentuh `runAnalysis` di `AppContext.tsx`, tidak ubah prompt, tidak ubah kunci dan batas.
+- **Pencarian Real-Time (Client-Side Filtering):** Pengguna dapat mengetik kata kunci dan daftar langsung terfilter tanpa *reload*. Cara: Memanfaatkan state `search`, `filteredAnalysis`, dan `filteredChallenges`. Operasi komparasi distandardisasi menggunakan `toLowerCase()` dan `includes()` untuk pencarian *case-insensitive* dengan kompleksitas O(N) yang ringan di memori browser.
+- **Isolasi State Navigasi Tab:** Perpindahan antara tab Analisis dan Tantangan berjalan mulus. Cara: Menggunakan state `activeTab` dengan *shared layout animation* `framer-motion` (`layoutId="riwayat-tab"`). Setiap transisi tab secara eksplisit memicu `setSearch('')` guna mereset *state* pencarian dan mencegah *data-leak* visual antar tab.
+- **Ekspor CSV Berstandar RFC 4180:** Pengguna dapat mengunduh CSV yang terjamin rapi saat dibuka di Excel. Cara: Fungsi `exportToCSV` dirancang membungkus nilai string dengan tanda kutip ganda ganda (`"..."`) dan melakukan *escaping* internal (`""`) agar koma di dalam baris kode tidak merusak struktur kolom. *Payload* disajikan menggunakan objek `Blob` browser (`riwayat-analisis.csv` 5 kolom, `riwayat-tantangan.csv` 4 kolom).
+- **Validasi Impor Data Ketat (State-Machine Parser):** Sistem mencegah korupsi data saat pengguna mengimpor balik file. Cara: Fungsi `parseCSVRow` bertindak sebagai *finite state machine* yang melacak status `inQuotes`. Baris korup (kurang kolom) diabaikan, dan *header* divalidasi secara ketat untuk menolak file yang tertukar secara anggun (memberikan *error toast* jelas tanpa merusak *database* lama).
+- **Zero-Regression pada Alur Inti:** Fitur baru tidak boleh merusak fungsi utama aplikasi. Cara: Menerapkan Prinsip Terbuka/Tertutup (*Open/Closed Principle*). Modul `runAnalysis` di `AppContext.tsx`, sistem *prompt* AI, manajemen kredensial API, dan batas *rate limit* sama sekali tidak disentuh.
 
-## 1. Dampak
+## 1. Analisis Dampak Arsitektur (Impact Analysis)
 | Bagian yang terdampak | File / fungsi | Perubahan yang diperlukan |
 |---|---|---|
-| Spesifikasi | `docs/01-spesifikasi.md` poin 3 pada repo dokumen | Tidak perlu tambah baru. Poin 3 sudah tulis "ekspor/impor riwayat JSON/CSV, pencarian dan filter riwayat". Kerja ini hanya pastikan kode sama dengan tulisan itu. |
-| Kode | `src/pages/RiwayatPage.tsx`, `src/lib/api.ts`, `src/lib/db.ts` pada repo kode | `RiwayatPage`: `search`, `activeTab`, `filteredAnalysis`, `filteredChallenges`, `handleExportJSON`, `handleExportCSV`, `handleImport`, `handleImportChallenges`, `parseCSVRow`, modal lihat, hapus, restore. `api.ts`: `exportToJSON`, `exportToCSV`, `downloadFile`, `formatTimestamp` format Indonesia. `db.ts`: database `koreksikoding-db` dengan store `history` dan `challenges`, fungsi `getAllHistory`, `getAllChallengeHistory`, `importHistory`, `importChallengeHistory`. Tidak ubah `runAnalysis`. |
-| Kasus uji / test | `docs/04-kasus-uji.md` U05 pada repo dokumen | Tidak perlu ID baru di repo dokumen. U05 sudah uji "simpan + cari + filter + ekspor CSV". Tabel di bawah hanya perincian U05 untuk cek manual. |
-| README | `README.md` pada kedua repo | Tidak perlu ubah. README repo kode sudah ada baris "Riwayat Analisis - Tersimpan lokal di IndexedDB, bisa di-export ke JSON/CSV". README repo dokumen masih ringkas. Kedua repo tidak punya folder bukti. |
+| Spesifikasi | `docs/01-spesifikasi.md` poin 3 pada repo dokumen | Tidak ada perubahan lingkup (*scope creep*). Spesifikasi awal sudah mencakup "ekspor/impor riwayat JSON/CSV, pencarian dan filter riwayat". Pekerjaan ini adalah realisasi arsitektural dari spesifikasi tersebut tanpa memodifikasi dokumen induk. |
+| Kode (UI & Persistensi) | `RiwayatPage.tsx`, `api.ts`, `db.ts` | **RiwayatPage:** Injeksi state `search`, `activeTab`, dan fungsi *handler* (`handleExportJSON/CSV`, `handleImport`). **api.ts:** Penambahan rutin Blob generator `exportToJSON/CSV` dan formatter tanggal lokal. **db.ts:** Penambahan antarmuka ORM `getAllHistory`, `importHistory`. *Dampak sistem: Terisolasi sempurna pada lapisan UI riwayat, tidak mengganggu performa CodeMirror.* |
+| Skenario Uji (Test) | `docs/04-kasus-uji.md` U05 pada repo dokumen | Skenario U05 ("simpan + cari + filter + ekspor") diekspansi menjadi serangkaian Pengujian Regresi (*Regression Testing*) C01-C05 di bawah ini untuk memvalidasi batas tepi (edge cases) pemrosesan string CSV. |
+| README | `README.md` pada kedua repo | Pembaruan minor. Deskripsi pada bagian fitur ditambahkan kalimat teknis terkait dukungan format ekspor lintas-platform (CSV/JSON RFC 4180). |
 
-## 2. Kasus uji baru
+## 2. Skenario Pengujian Regresi (Regression Testing)
 | ID | Langkah / input | Hasil yang diharapkan |
 |---|---|---|
-| C01 | Isi Riwayat dengan 3 entri kode berisi kata "tambah", "kurang", "kali". Ketik "tambah" di kolom cari. Hapus lagi. | Saat ketik "tambah" hanya 1 entri tampil. Saat dihapus 3 entri tampil lagi. Kalau tidak cocok tampil pesan "Tidak ada hasil pencarian". |
-| C02 | Klik tab Tantangan lalu ketik judul tantangan. Pindah lagi ke tab Analisis. | Filter judul tidak peduli huruf besar kecil. Setiap ganti tab kolom cari kembali kosong. |
-| C03 | Klik Ekspor CSV di tab Analisis lalu buka di Excel. | File `riwayat-analisis.csv` terunduh. Header `Tanggal,Skor,Error,Warning,Saran`. Jumlah baris sama dengan jumlah entri. Tanggal format Indonesia misal `12 Okt 2026, 10.00`. Nilai berkoma tetap satu kolom karena dikutip. |
-| C04 | Impor balik file CSV dari C03. Lalu coba impor file tantangan ke tab analisis. Coba impor file kosong. | Impor benar tampil toast jumlah berhasil dan entri bertambah. Baris kurang dari 5 kolom dilewati. File tertukar ditolak dengan pesan bukan analisis dan data tidak rusak. File kosong ditolak. |
-| C05 | Klik Ekspor CSV di tab Tantangan lalu impor balik. | File `riwayat-tantangan.csv` terunduh dengan header `Tanggal,Judul,Tingkat,Bahasa`. Impor balik tambah entri. Baris kurang dari 4 kolom dilewati. File analisis yang masuk ke tab tantangan ditolak. |
+| C01 | Isi Riwayat dengan 3 entri kode (mengandung kata "tambah", "kurang", "kali"). Ketik "tambah" di kolom pencarian. Hapus teks pencarian. | *State Mutability:* Saat diketik, layar secara reaktif hanya merender 1 entri ("tambah"). Saat dihapus, 3 entri kembali tampil. Input acak memunculkan *empty state* "Tidak ada hasil pencarian". |
+| C02 | Klik tab Tantangan, ketik kata kunci acak. Pindah kembali ke tab Analisis. | *Tab Lifecycle:* Filter bekerja *case-insensitive*. Saat perpindahan tab terjadi, *state* kata kunci otomatis ter-reset (kosong), mencegah sisa pencarian mengotori daftar tab lain. |
+| C03 | Klik Ekspor CSV di tab Analisis. Buka file hasil unduhan di Microsoft Excel / Google Sheets. | *RFC 4180 Compliance:* File terunduh sempurna. Baris berkoma (seperti kode `console.log(a, b)`) tidak terpisah ke kolom lain karena sistem *escaping* kutip ganda bekerja. Header `Tanggal,Skor,Error,Warning,Saran` konsisten. |
+| C04 | Impor balik file CSV dari C03. Lakukan injeksi kesalahan: impor file tantangan ke tab analisis, dan impor file korup/kosong. | *Strict Validation:* Impor sukses memunculkan notifikasi *Toast*. Baris kurang dari 5 kolom otomatis dilewati (tidak merusak aplikasi). Modul menolak keras file yang disilang (tantangan ke analisis) dengan pesan validasi elegan. |
+| C05 | Klik Ekspor CSV di tab Tantangan, ubah sebagian teks di Excel, lalu impor balik ke aplikasi. | *Data Integrity:* File `riwayat-tantangan.csv` (4 kolom) sukses dimodifikasi dan dikembalikan ke sistem lokal (IndexedDB) sebagai entri baru yang valid tanpa menimbulkan duplikasi *Primary Key* yang crash. |
 
 ## 3. Setelah selesai
-- [ ] Kasus uji lama tetap lulus
-- [ ] Kasus uji baru lulus
+- [ ] Kasus uji lama tetap lulus (Zero-Regression terkonfirmasi)
+- [ ] Kasus uji baru lulus (Batas tepi / edge cases aman)
 - [ ] Spesifikasi diperbarui
 - [ ] README diperbarui
