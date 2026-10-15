@@ -1,11 +1,31 @@
 # KoreksiKoding
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-green)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
 Platform analisis kode berbasis AI. Kode dianalisis secara instan untuk mendeteksi error, warning, saran perbaikan, dan menghasilkan kode yang sudah diperbaiki.
 
 ## Alur Inti
 
-Jelaskan langkah yang dilakukan pengguna dari awal sampai akhir.
+Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir beserta arsitektur pemrosesannya:
 
+**Arsitektur Alur Pengguna (User Flow):**
+
+```mermaid
+flowchart TD
+    A([Input Kode Siswa]) --> B[Editor CodeMirror 6]
+    B --> C{Pre-flight Validation}
+    C -->|Valid| D[Cek API Key & Kuota]
+    C -->|Kosong| Z([Tolak Input])
+    D --> E[Socratic AI Engine]
+    E <-->|Arsitektur BYOK| F[(Gemini / Groq API)]
+    E --> G{Robust JSON Parser}
+    G -->|Sukses| H[Render UI: 5 Tab Socratic]
+    G -->|Halusinasi AI| Y([Fallback Regex/Filter])
+    H --> I[(Auto-Save IndexedDB)]
+    H --> J[Ekspor CSV RFC 4180]
+```
 1. Buka aplikasi di browser, pilih atau tulis kode pada editor CodeMirror 6.
 2. Klik tombol analisis atau jalankan perintah untuk mendeteksi error, kerentanan, dan optimasi.
 3. Tinjau hasil analisis, perbaikan instan, mode belajar, atau konversi kode yang dihasilkan AI.
@@ -20,21 +40,13 @@ Jelaskan langkah yang dilakukan pengguna dari awal sampai akhir.
 ### Langkah
 
 1. Clone repositori:
-   ```bash
-   git clone https://github.com/steampreneur/koreksikoding.git
-   ```
+    git clone https://github.com/mynamethiris/steampreneur-koreksikoding.git
 2. Masuk ke folder proyek:
-   ```bash
-   cd koreksikoding
-   ```
+    cd steampreneur-koreksikoding
 3. Install dependensi:
-   ```bash
-   npm install
-   ```
+    npm install
 4. Jalankan website (development server):
-   ```bash
-   npm run dev
-   ```
+    npm run dev
 5. Buka alamat berikut di browser: `http://localhost:5173`
 
 ### Akun atau data contoh
@@ -47,7 +59,11 @@ Aplikasi ini berjalan secara client-side dan tidak memerlukan login server. Peng
 
 ### Jika terjadi masalah
 
+Bagian ini adalah panduan pemecahan masalah (Troubleshooting Guide) jika penguji mengalami kendala di lingkungan lokal:
+
 - **Port 5173 sudah dipakai**: Vite otomatis menawarkan port alternatif (misalnya `5174`), atau jalankan dengan `npm run dev -- --port 3000`.
+- **Error npm ERR! code ERESOLVE saat install**: Terjadi karena konflik *peer dependencies*. Gunakan perintah `npm install --legacy-peer-deps`.
+- **Layar Putih (Blank Screen)**: Hapus cache lokal dengan membuka Developer Tools (F12) > Application > Clear Site Data, lalu muat ulang halaman.
 - **API Key Error**: Pastikan kuota API key mencukupi dan format endpoint custom sesuai standar OpenAI.
 
 ## Tangkapan Layar Alur Inti
@@ -57,9 +73,7 @@ Aplikasi ini berjalan secara client-side dan tidak memerlukan login server. Peng
 
 ## Cara Menjalankan Pengujian
 
-```bash
-npm run lint
-```
+    npm run lint
 
 Hasil yang diharapkan: linting bersih tanpa error (menggunakan oxlint).
 
@@ -101,14 +115,16 @@ Hasil yang diharapkan: linting bersih tanpa error (menggunakan oxlint).
 
 | Nama | Sumber (link) | Lisensi |
 |---|---|---|
-| React | https://react.dev | MIT |
-| Vite | https://vite.dev | MIT |
-| Tailwind CSS | https://tailwindcss.com | MIT |
-| CodeMirror 6 | https://codemirror.net | MIT |
-| Lucide Icons | https://lucide.dev | ISC |
+| React | [https://react.dev](https://react.dev) | MIT |
+| Vite | [https://vite.dev](https://vite.dev) | MIT |
+| Tailwind CSS | [https://tailwindcss.com](https://tailwindcss.com) | MIT |
+| CodeMirror 6 | [https://codemirror.net](https://codemirror.net) | MIT |
+| Lucide Icons | [https://lucide.dev](https://lucide.dev) | ISC |
 
 ## Tim
 
-| Nama | Peran |
-|---|---|
-| Tim STEAMpreneur | Developer / Engineer |
+| Nama Lengkap | Akun GitHub | Peran |
+|---|---|---|
+| Favian Zufar Niardi | [@mynamethiris](https://github.com/mynamethiris) | Frontend Engineer, UI/UX, Navigation Logic |
+| Andante Akmal Alvaro | [@andanteakmalalvaro-lab](https://github.com/andanteakmalalvaro-lab) | AI Parser, Security Engineering, Build Setup |
+| Bastian Nathaniel Inhadi | [@BazBizBuz](https://github.com/BazBizBuz) | State Management, IndexedDB, Testing |
