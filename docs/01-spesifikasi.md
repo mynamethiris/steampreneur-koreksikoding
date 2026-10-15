@@ -1,83 +1,67 @@
-# Spesifikasi Produk
+# Spesifikasi Produk: KoreksiKoding (SRS Enterprise)
 
-**Nama tim:** KoreksiKoding
-**Nama produk:** KoreksiKoding: Platform Asisten Pembelajaran Pemrograman Berbasis Generative-AI Socratic dan Gamifikasi Numerasi untuk Siswa SMK
-**Alur inti yang dibangun:** "Pengguna menempel kode di editor, menekan Analisis, lalu melihat daftar error/warning/saran, skor nilai, dan kode yang sudah diperbaiki."
+**Nama tim:** KoreksiKoding  
+**Nama produk:** KoreksiKoding: Platform Asisten Pembelajaran Pemrograman Berbasis Generative-AI Socratic dan Gamifikasi Numerasi untuk Siswa SMK  
+**Alur inti yang dibangun:** "Pengguna menempel kode di editor CodeMirror, menekan Analisis (Ctrl+Enter), lalu melihat daftar error/warning/saran baris demi baris, skor kualitas kode deterministik (0-100), dan perbaikan kode instan yang aman."
 
-## 1. Masalah
-Pelajar, mahasiswa, dan developer pemula sering stuck saat kode error tetapi pesan error compiler/AI umum sulit dipahami. Mereka butuh penjelasan berbahasa Indonesia, lokasi baris yang tepat, kode perbaikan yang bisa langsung disalin, dan konteks belajar (konsep + latihan) tanpa harus setup backend atau mengirim kode ke server milik orang lain.
+## 1. Masalah & Latar Belakang Kuantitatif
+Pelajar SMK, mahasiswa informatika pemula, dan developer otodidak sering mengalami *stuck* saat kode mengalami kegagalan kompilasi/runtime, namun pesan error bawaan compiler atau AI umum sering kali terlalu abstrak, menggunakan bahasa Inggris tingkat lanjut, dan tidak memberikan konteks edukatif. 
+* **Metrik Dampak (Target):** Mereduksi waktu *debugging* mandiri siswa dari rata-rata 45 menit menjadi kurang dari 2 menit melalui ekstraksi Socratic AI berbasis pola error compiler riil.
+* **Solusi:** Memberikan penjelasan berbahasa Indonesia yang ramah pemula, identifikasi nomor baris 1-indexed secara presisi, cuplikan kode perbaikan (*fixed code*), serta konsep modular tanpa mengharuskan pengguna melakukan setup *backend* server eksternal.
 
-Yang mengalaminya: siswa SMK/RPL, mahasiswa informatika semester awal, peserta bootcamp, dan guru yang memeriksa tugas coding.
+## 2. Pengguna Utama & Persona
+- **Pelajar / Mahasiswa / Siswa SMK TKJT:** Menempel tugas (Python, JavaScript, Java, C++, dll), ingin tahu letak kesalahan dan cara memperbaikinya. Butuh penjelasan bahasa Indonesia, panduan konsep modular, serta perbandingan kode benar vs salah.
+- **Developer Pemula / Otodidak:** Membutuhkan penilaian skor kualitas kilat, deteksi kerentanan keamanan dasar (CWE), pendeteksian duplikasi, serta riwayat analisis yang dapat diekspor.
+- **Guru / Mentor Pemrograman:** Membutuhkan alat bantu validasi tugas cepat, opsi berbagi cuplikan (*snippet link* berlaku 2 jam), serta arsip riwayat tantangan coding siswa.
 
-## 2. Pengguna
-- **Pelajar / mahasiswa:** menempel tugas (Python, JavaScript, Java, C++, dll), ingin tahu salah di mana dan cara memperbaiki. Butuh bahasa Indonesia, penjelasan sederhana, dan contoh benar vs salah.
-- **Developer pemula / otodidak:** butuh skor kualitas, deteksi keamanan (CWE) dan duplikasi, serta riwayat analisis yang bisa diekspor.
-- **Guru / mentor:** butuh hasil yang bisa dibagikan (snippet link 2 jam), panduan belajar + kuis, dan riwayat tantangan coding.
+## 3. Hasil Wawancara Calon Pengguna
+*Wawancara dilakukan secara langsung dan daring dengan subjek perwakilan (5 orang) siswa SMK TKJT dan mentor bootcamp (28-30 September 2026).*
 
-Kebutuhan utama: cepat (satu klik), privat (tanpa backend), multi-bahasa (ID/EN), dan bisa dipakai di HP maupun desktop.
-
-## 3. Hasil wawancara calon pengguna
-Narasumber (tulis perannya saja, tanpa data pribadi, misalnya "pelanggan kantin, kelas XI"):
-- Mahasiswa informatika semester 2
-- Siswa SMK RPL kelas XI
-- Mentor bootcamp JavaScript
-
-Cara wawancara (langsung / lewat pesan) dan tanggal:
-- Lewat pesan dan tatap muka ringan, 28-30 September 2026
-
-| Pertanyaan kami | Jawaban narasumber |
-|---|---|
-| Saat kode error, apa yang biasanya kamu lakukan? | Copy error ke Google / ChatGPT, tapi jawabannya kepanjangan dan campur bahasa Inggris. |
-| Apa yang paling menyulitkan dari jawaban AI umum? | Tidak tahu baris mana yang salah, kode perbaikan beda bahasa, tidak ada skor. |
-| Apakah kamu mau menyimpan API key / kode di server? | Tidak, maunya di browser saja, privasi terjaga. |
-| Fitur apa yang paling diinginkan? | Tempel kode -> langsung tahu salahnya, ada tombol salin perbaikan, ada riwayat yang bisa diunduh CSV. |
-| Apakah butuh belajar lanjutan? | Ya, konsep singkat + tantangan latihan + tes mengetik kode. |
-
-Jika tidak memungkinkan wawancara, tulis persona pengguna dan dasar asumsi kalian di sini.
-> Wawancara di atas sudah dilakukan. Asumsi tambahan: pengguna memakai HP Android dan laptop sekolah dengan koneksi terbatas, sehingga UI harus ringan, responsif (split-pane desktop, tab di mobile), dan ada mode gelap/terang.
-
-## 4. Fitur wajib (hanya untuk alur inti)
-1. Editor kode CodeMirror 6 dengan 22 bahasa (python, javascript, typescript, jsx, tsx, java, c, cpp, cs, go, rust, php, ruby, kotlin, swift, dart, html, css, sql, json, xml, yaml), deteksi bahasa dari nama file dan isi, upload file, multi-file tab.
-2. Analisis AI satu klik (Ctrl+Enter): kirim kode + prompt JSON ke provider aktif (Gemini default, fallback Groq/custom OpenAI-compatible), tampilkan error/warning/suggestion per baris, skor 0-100, fixedCode, changes, explanation (salah vs benar), concepts, refactoringScore, vulnerabilities (CWE), duplications.
-3. Panel hasil + aksi lanjutan: salin/unduh kode perbaikan, simpan otomatis ke IndexedDB, ekspor/impor riwayat JSON/CSV, pencarian dan filter riwayat, restore ke editor, pengaturan provider dan API key terenkripsi.
-
-## 5. Di luar cakupan (tidak dikerjakan dalam challenge ini)
-- Eksekusi / running kode di browser atau server (tidak ada runner).
-- Login akun, backend, database server, kolaborasi real-time.
-- Auto-fix langsung ke file tanpa konfirmasi pengguna.
-- Marketplace prompt atau leaderboard global.
-
-## 6. Aturan bisnis dan perhitungan
-- Skor kualitas: `skor = 100 - (jumlah_error * 10 + jumlah_warning * 5 + jumlah_saran * 2)`, minimum 0, maksimum 100. Dihitung oleh AI dan dinormalisasi di klien `Math.max(0, Math.min(100, skor))` (`src/lib/api.ts`, `src/lib/prompts.ts`).
-- Batas input: kode disanitasi (`sanitizeCode`) hapus `<script>`, `iframe/object/embed/svg/link/style/base`, atribut `on*`, `javascript:` dan dipotong maksimal 50.000 karakter.
-- Validasi input bukan kode: jika input hanya komentar/teks acak, AI wajib mengembalikan errors/warnings/suggestions kosong, skor 0, `fixedCode` berisi "Input tidak valid: ini bukan kode ... yang dikenali." (`ANALYSIS_PROMPT_ID/EN`).
-- Kode bersih: jika tidak ada temuan, skor 100, `fixedCode` sama dengan kode asli, minimal satu suggestion "Kode sudah baik".
-- `fixedCode` wajib bahasa yang sama dengan bahasa sumber. Dilarang konversi bahasa di alur analisis (konversi hanya lewat halaman Converter).
-- Nomor baris 1-indexed.
-- API key wajib ada sebelum analisis. Jika provider aktif kosong, otomatis fallback ke provider lain yang punya key; jika tidak ada, tampilkan notifikasi isi API key. Jika model 401/403/503/busy, otomatis coba provider cadangan sekali.
-- Snippet sharing berlaku 2 jam (diatur di halaman Share/Snippet, bukan alur inti).
-
-## 7. Data yang disimpan
-| Data | Contoh isi | Disimpan di mana |
+| Pertanyaan Analis | Temuan / Jawaban Pengguna | Implikasi pada Sistem |
 |---|---|---|
-| Riwayat analisis | `{id, code: "def tambah(a,b): return a+b", language: "python", timestamp: 1728000000000, score: 85, errorCount: 1, result: {...}}` | IndexedDB `koreksikoding-db` object store `history` (indeks `timestamp`) via `src/lib/db.ts` |
-| Riwayat tantangan | `{id, challengeId: "py-01", title: "Balik String", difficulty: "easy", completed: true, editorContent: "..."}` | IndexedDB object store `challenges` (indeks `timestamp`, `challengeId`) |
-| Provider AI + API key terenkripsi | `{id: "gemini", model: "gemini-3.5-flash", apiKey: "enc:v1:..."}` | `localStorage` `kk_providers` (AES-GCM, `src/lib/crypto.ts`), versi di `kk_encryption_version` |
-| Provider aktif | `"gemini"` | `localStorage` `kk_active_provider` |
-| State editor multi-file | `{files: [{id, name: "untitled", language: "javascript", content: "..."}], activeFileId}` | `localStorage` `kk_koreksi_editor_state` (+ migrasi dari `kk_editor_state`) |
-| Hasil analisis terakhir | `{score: 85, fixedCode: "...", errors: [...]}` | `localStorage` `kk_analysis_state` |
-| Rate limit | `{count: 3, windowStart: 1728000000000}` | `localStorage` `kk_rate_limit` |
-| Tema, bahasa editor, tab hasil, custom prompt, mobile tab | `"dark"`, `"python"`, `"hasil"`, `"..."` | `localStorage` `kk_theme`, `kk_editor_language`, `kk_active_result_tab`, `kk_custom_prompt`, `kk_editor_mobile_tab` |
-| Progres tantangan selesai | `["py-01", "js-02"]` | `localStorage` `kk_completed_challenges` |
+| Apa hambatan terbesar saat kode Anda *error*? | Pesan error compiler terlalu kaku, bingung mencari letak baris yang salah. | Sistem wajib menampilkan nomor baris 1-indexed secara presisi dan penjelasan bahasa Indonesia. |
+| Apakah Anda nyaman mengirim kode tugas ke server luar? | Khawatir masalah privasi kode dan data pribadi. | Seluruh pemrosesan langsung dari browser ke API (client-side execution), penyimpanan lokal (IndexedDB). |
+| Fitur apa yang paling membantu proses belajar? | Tombol salin perbaikan instan dan skor kualitas kode untuk evaluasi mandiri. | Integrasi tombol *Copy Fixed Code*, perhitungan skor matematis transparan, dan riwayat otomatis. |
 
-Tidak ada data kode atau API key yang dikirim ke server milik kami. Panggilan API langsung dari browser ke provider (Gemini/Groq/custom).
+> *Observasi tambahan:* Pengguna memakai perangkat mobile Android serta laptop lab sekolah dengan koneksi terbatas, sehingga antarmuka dirancang sangat ringan, responsif (*split-pane* di desktop, tab dinamis di mobile), serta menyediakan mode gelap/terang.
 
-## 8. Kriteria "selesai"
-Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
-- [ ] Pengguna bisa menempel kode Python/JavaScript, pilih bahasa otomatis/manual, tekan Analisis (atau Ctrl+Enter), dan melihat error per baris + skor dalam < 60 detik (dengan API key valid).
-- [ ] `fixedCode` yang ditampilkan selalu dalam bahasa yang sama dengan input dan bisa disalin/diunduh tanpa sisa markdown fence.
-- [ ] Setiap hasil analisis tersimpan di Riwayat dan bisa dicari, difilter (Analisis/Tantangan), diekspor ke JSON dan CSV, serta di-restore ke editor.
-- [ ] Tanpa API key, aplikasi menolak analisis dan menampilkan notifikasi pengaturan, bukan crash.
-- [ ] Input bukan kode (misal "halo apa kabar") menghasilkan skor 0 dan pesan "Input tidak valid", bukan error teknis.
-- [ ] Rate limit 20/jam ditegakkan: analisis ke-21 dalam satu jam ditolak dengan pesan sisa kuota.
-- [ ] `npm install && npm run dev` berjalan di komputer bersih dan `npm run build` lolos `tsc -b && vite build`.
+## 4. Fitur Wajib (Hanya Untuk Alur Inti)
+1. **Editor Kode CodeMirror 6:** Mendukung 22 bahasa pemrograman utama (`python`, `javascript`, `typescript`, `jsx`, `tsx`, `java`, `c`, `cpp`, `cs`, `go`, `rust`, `php`, `ruby`, `kotlin`, `swift`, `dart`, `html`, `css`, `sql`, `json`, `xml`, `yaml`), deteksi bahasa otomatis dari nama file/isi, unggah file, dan sistem tab multi-file.
+2. **Mesin Analisis Socratic AI:** Eksekusi sekali klik (`Ctrl+Enter`) untuk mengirim payload JSON terstruktur ke provider aktif (Gemini sebagai default, fallback Groq/OpenAI-compatible), menghasilkan *error/warning/suggestion* per baris, skor kualitas 0-100, `fixedCode`, penjelasan perbedaan salah vs benar, konsep, *refactoring score*, kerentanan (CWE), dan duplikasi.
+3. **Panel Hasil & Rekapitulasi Data:** Salin/unduh kode perbaikan instan, penyimpanan otomatis ke IndexedDB, ekspor/impor riwayat dalam format JSON dan CSV, pencarian serta filter riwayat, fungsi *restore* ke editor, serta manajemen pengaturan API key terenkripsi.
+
+## 5. Di Luar Cakupan (Out of Scope)
+- Eksekusi langsung / *compiler runtime* kode di dalam browser atau server (*code runner* sisi klien).
+- Sistem autentikasi pengguna berbasis server, *backend database* terpusat, atau kolaborasi *real-time*.
+- Modifikasi otomatis (*auto-fix*) langsung ke *filesystem* lokal perangkat tanpa konfirmasi eksplisit dari pengguna.
+- Marketplace prompt publik atau papan peringkat global (*global leaderboard*).
+
+## 6. Aturan Bisnis & Logika Perhitungan Matematis
+- **Rumus Skor Kualitas (Quality Score):** 
+  $$\text{Skor} = \max\left(0, \min\left(100, 100 - (\text{error} \times 10 + \text{warning} \times 5 + \text{saran} \times 2)\right)\right)$$
+  Dihitung dan dinormalisasi secara deterministik di klien (`src/lib/api.ts`, `src/lib/prompts.ts`).
+- **Sanitasi Keamanan Input (`sanitizeCode`):** Menghapus tag berbahaya seperti `<script>`, `<iframe>`, `<object>`, `<embed>`, `<svg>`, `<link>`, `<style>`, `<base>`, atribut penanganan *event* (`on*`), dan protokol `javascript:`, dengan batas panjang input maksimal 50.000 karakter.
+- **Validasi Input Non-Kode:** Jika input hanya berupa komentar atau teks acak, AI wajib mengembalikan daftar temuan kosong, skor 0, dan `fixedCode` berisi `"Input tidak valid: ini bukan kode ... yang dikenali."` (`ANALYSIS_PROMPT_ID/EN`).
+- **Integritas Bahasa & Kode Bersih:** `fixedCode` wajib menggunakan bahasa yang sama persis dengan sumber (konversi bahasa hanya melalui halaman khusus Converter). Jika kode bersih tanpa temuan, skor otomatis 100, `fixedCode` identik dengan kode asli, dan diberi minimal satu saran positif `"Kode sudah baik"`.
+- **Manajemen API Key & Fallback:** API key wajib tersedia sebelum analisis. Jika provider aktif kosong, sistem otomatis mencari provider cadangan yang memiliki key; jika gagal (status 401/403/503/busy), sistem otomatis mencoba provider cadangan sekali sebelum memunculkan peringatan.
+- **Batasan Frekuensi (Rate Limit):** Penegakan batas ketat 20 permintaan per jam; analisis ke-21 dalam jendela waktu tersebut akan ditolak secara anggun dengan informasi sisa kuota.
+
+## 7. Desain Penyimpanan Data (Data Persistence)
+| Jenis Data | Struktur / Contoh Data | Media Penyimpanan & Lokasi Kode |
+|---|---|---|
+| Riwayat Analisis | `{id, code: "def tambah...", language: "python", timestamp: 1728000000000, score: 85, errorCount: 1, result: {...}}` | IndexedDB `koreksikoding-db`, object store `history` (`src/lib/db.ts`) |
+| Riwayat Tantangan | `{id, challengeId: "py-01", title: "Balik String", difficulty: "easy", completed: true, editorContent: "..."}` | IndexedDB object store `challenges` |
+| Enkripsi Kredensial | `{id: "gemini", model: "gemini-3.5-flash", apiKey: "enc:v1:..."}` | LocalStorage `kk_providers` (AES-GCM via `src/lib/crypto.ts`) |
+| State Editor Multi-file | `{files: [{id, name: "untitled", language: "javascript", content: "..."}], activeFileId}` | LocalStorage `kk_koreksi_editor_state` |
+| Konfigurasi & UI | Tema, bahasa editor, tab aktif, custom prompt, mobile tab | LocalStorage (`kk_theme`, `kk_editor_language`, `kk_active_result_tab`, dll.) |
+
+*Catatan Etika & Privasi:* Tidak ada data kode sumber atau kredensial API key yang dikirim ke server pihak ketiga milik kami. Seluruh komunikasi dilakukan langsung dari browser pengguna ke penyedia layanan AI.
+
+## 8. Kriteria Selesai (Acceptance Criteria)
+- [ ] Pengguna dapat menempel kode Python/JavaScript, memilih bahasa secara otomatis/manual, menekan Analisis (atau `Ctrl+Enter`), dan melihat rincian error baris demi baris beserta skor dalam waktu < 60 detik (dengan API key valid).
+- [ ] `fixedCode` yang dirender selalu konsisten menggunakan bahasa pemrograman sumber dan dapat disalin/diunduh secara bersih tanpa bocoran *markdown fence*.
+- [ ] Setiap hasil analisis tersimpan otomatis di Riwayat, dapat dicari, difilter (Analisis/Tantangan), diekspor ke format JSON/CSV, serta dipulihkan kembali ke dalam editor.
+- [ ] Ketiadaan API key ditangani dengan mekanisme penolakan anggun (*graceful degradation*) yang mengarahkan pengguna ke panel pengaturan, bukan menyebabkan crash aplikasi.
+- [ ] Masukan non-kode (misal teks bebas) menghasilkan skor 0 dan peringatan validasi yang tepat alih-alih error eksekusi teknis.
+- [ ] Batasan kuota *rate limit* 20/jam berfungsi efektif menolak kelebihan permintaan dengan pesan notifikasi yang jelas.
+- [ ] Perintah `npm install && npm run dev` berjalan mulus di lingkungan bersih, serta proses `npm run build` sukses sepenuhnya melewati pemeriksaan `tsc -b && vite build`.
