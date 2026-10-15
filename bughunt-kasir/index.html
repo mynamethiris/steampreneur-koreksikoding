@@ -135,6 +135,43 @@
       </div>
       <div id="hasil-bayar"></div>
     </section>
+  <main>
+    <!-- ... (bagian Tambah Pesanan, Keranjang, dan Pembayaran biarkan seperti aslinya) ... -->
+
+    <!-- Tambahkan kode di bawah ini tepat di bawah section Pembayaran -->
+    <section>
+      <h2>Riwayat Transaksi</h2>
+      <!-- Baris untuk Pencarian, Filter, dan Ekspor -->
+      <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+        <input type="text" id="cari-riwayat" placeholder="Cari ID Transaksi..." style="padding: 8px; border: 1px solid var(--garis); border-radius: 6px; flex: 1; min-width: 150px;">
+        <select id="filter-riwayat" style="padding: 8px; border: 1px solid var(--garis); border-radius: 6px;">
+          <option value="semua">Semua Transaksi</option>
+          <option value="member">Hanya Member</option>
+          <option value="non-member">Hanya Non-Member</option>
+        </select>
+        <button id="tombol-export-csv" type="button" style="background: var(--hijau);">Ekspor ke CSV</button>
+      </div>
+
+      <!-- Tabel Riwayat -->
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Transaksi</th>
+              <th>Waktu</th>
+              <th>Member</th>
+              <th class="angka">Total</th>
+              <th class="angka">Bayar</th>
+              <th class="angka">Kembalian</th>
+            </tr>
+          </thead>
+          <tbody id="isi-riwayat">
+            <tr><td colspan="6" class="kosong">Belum ada riwayat transaksi</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
   </main>
 
   <script src="kasir.js"></script>
