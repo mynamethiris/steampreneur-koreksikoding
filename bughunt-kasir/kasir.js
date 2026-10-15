@@ -27,16 +27,22 @@ function tambahItem(keranjang, kode, qty) {
   if (!produk) {
     throw new Error("Produk tidak ditemukan");
   }
-
+const numQty = Number(qty);
+if (!Number.isInteger(numQty) || numQty < 1 || numQty > 99) {
+  throw new Error("Jumlah pesanan tidak valid");
+  }
   const itemLama = keranjang.find((i) => i.kode === kode);
   if (itemLama) {
-    itemLama.qty += qty;
+    if (itemLama.qty + numQty > 99) {
+      throw new Error("Jumlah pesanan melebihi batas maksimal");
+      }
+    itemLama.qty += numQty;
   } else {
     keranjang.push({
       kode: produk.kode,
       nama: produk.nama,
       harga: produk.harga,
-      qty: qty,
+      qty: numQty,
     });
   }
   return keranjang;
@@ -57,18 +63,21 @@ function hitungSubtotal(keranjang) {
 // Diskon belanja dan diskon member.
 function hitungDiskon(subtotal, member) {
   let diskon = 0;
-  if (subtotal > 100000) {
-    diskon += (subtotal * 5) / 100;
-  }
   if (member) {
-    diskon += (subtotal * 10) / 100;
+    diskon = (subtotal * 10) / 100;
+  }
+  else if (subtotal >= 100000) { 
+    diskon = (subtotal * 5) / 100;
+  }
+  else {
+    diskon = 0;
   }
   return Math.round(diskon);
 }
 
 // PPN 11% dari dasar pengenaan pajak (subtotal setelah diskon).
 function hitungPPN(dasar) {
-  return Math.floor((dasar * 11) / 100);
+  return Math.round((dasar * 11) / 100);
 }
 
 function hitungRingkasan(keranjang, member) {
@@ -81,6 +90,9 @@ function hitungRingkasan(keranjang, member) {
 }
 
 function hitungKembalian(total, bayar) {
+  if (bayar < total) {
+    throw new Error("Uang pembayaran kurang");
+  }
   return bayar - total;
 }
 
